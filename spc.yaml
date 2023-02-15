@@ -1,0 +1,28 @@
+---
+- name: deploy spc
+  become: yes
+  hosts: localhost
+  tasks:
+    - name: install java 17
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
+        update_cache: yes
+        state: present
+    - name: install maven
+      ansible.builtin.apt:
+        name: maven
+        update_cache: yes
+        state: present
+    - name: Get spc url
+      ansible.builtin.git:
+        repo: 'https://github.com/spring-projects/spring-petclinic.git'
+        dest: /home/svc/my-project
+        clone: true
+    - name: build package
+      ansible.builtin.command:
+        chdir: /home/svc/my-project
+        cmd: ./mvnw package
+    - name: running jar file
+      ansible.builtin.shell:
+        chdir: /home/svc/my-project/target
+        cmd: java -jar spring-petclinic-3.0.0-SNAPSHOT.jar
