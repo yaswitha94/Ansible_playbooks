@@ -1,0 +1,19 @@
+---
+- name: deploy game of life
+  become: yes
+  hosts: localhost
+  tasks:
+    - name: install java 11
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        update_cache: yes
+        state: present
+    - name: download the spring-petclinic jar file
+      ansible.builtin.get_url:
+        dest: /home/svc/my-project
+        url: https://referenceapplicationskhaja.s3.us-west-2.amazonaws.com/spring-petclinic-2.4.2.jar
+    - name: running jar file
+      ansible.builtin.shell:
+        chdir: /home/svc/my-project/target
+        cmd: java -jar spring-petclinic-2.4.2.jar
+      
