@@ -1,0 +1,45 @@
+---
+- name: deploy nop
+  become: yes
+  hosts: localhost
+  tasks:
+    - name: download the debian file
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        dest: /tmp/packages-microsoft-prod.deb
+    - name: install the debian package
+      ansible.builtin.apt:
+        deb: /tmp/packages-microsoft-prod.deb
+    - name: install .net core runtimes
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: yes
+        state: present
+      with_items:
+       - apt-transport-https
+       - aspnetcore-runtime-7.0
+    - name: install unzip
+      ansible.builtin.apt:
+        name: unzip
+        update_cache: yes
+        state: present
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /var/www/nopCommerce
+        state: directory
+        mode: '0755'
+    - name: unzip url
+      ansible.builtin.unarchive:
+        src: https://github.com/nopSolutions/nopCommerce/releases/download/release-4.60.2/nopCommerce_4.60.2_NoSource_linux_x64.zip
+        remote_src: true
+        dest:  /var/www/nopCommerce
+    - name: Create a systemd unit file
+      ansible.builtin.copy:
+        src:  nopCommerce.service
+        dest: /etc/systemd/system/nopCommerce.service
+    - name: reload daemon and start nop
+      ansible.builtin.systemd:
+        name: nopCommerce.service
+        daemon_reload: yes
+        enabled: yes
+        state: started
