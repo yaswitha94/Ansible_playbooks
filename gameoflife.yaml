@@ -1,7 +1,7 @@
 ---
 - name: deploy game of life
   become: yes
-  hosts: all
+  hosts: localhost
   tasks:
     - name: install java 8
       ansible.builtin.apt:
